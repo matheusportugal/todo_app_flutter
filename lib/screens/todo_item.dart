@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_app/models/Todo.dart';
 
 class TodoItem extends StatefulWidget {
   const TodoItem({Key key}) : super(key: key);
@@ -10,6 +14,19 @@ class TodoItem extends StatefulWidget {
 class _TodoItemState extends State<TodoItem> {
   final _tituloController = TextEditingController();
   final _descricaoController = TextEditingController();
+
+  _saveItem() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<Todo> list = [];
+    var data = prefs.getString('list');
+    if (data != null) {
+        var objs = jsonDecode(data) as List;
+        list = objs.map((obj) => Todo.fromJson(obj)).toList();
+    }
+    debugPrint(list.toString());
+    Todo todo = Todo.fromTituloDescricao(_tituloController.text, _descricaoController.text);
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +56,20 @@ class _TodoItemState extends State<TodoItem> {
               ),
             ),
           ),
-          RaisedButton(
-            child: Text('Salvar'),
-            color: Colors.greenAccent,
-            textColor: Colors.white,
-            onPressed: () {
-              debugPrint(_tituloController.text);
-              debugPrint(_descricaoController.text);
-            },
-          )
+          ButtonTheme(
+              minWidth: double.infinity,
+              child: RaisedButton(
+                child: Text('Salvar', style: TextStyle(
+                    fontSize: 16.0
+                )),
+                color: Colors.greenAccent,
+                textColor: Colors.white,
+                onPressed: () {
+                  _saveItem();
+                },
+              )
+          ),
+
         ],
       ),
     );
